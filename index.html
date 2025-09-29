@@ -13,6 +13,29 @@
 		<noscript><link rel="stylesheet" href="html5up-dimension/assets/css/noscript.css" /></noscript>
 		<!-- Custom styles for our application -->
 		<style>
+			/* New styles for the blurry background */
+			#bg:before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop');
+				background-position: center;
+				background-size: cover;
+				background-repeat: no-repeat;
+				filter: blur(8px);
+				transform: scale(1.1); /* Prevents blurry edges */
+				z-index: -1; /* Puts the image behind the color overlay */
+			}
+
+			/* Increased the size of the logo container */
+			#header .logo {
+				width: 7.5rem;
+				height: 7.5rem;
+			}
+
 			#image-upload-label {
 				border: 2px dashed rgba(255, 255, 255, 0.25);
 				padding: 2em;
@@ -82,7 +105,7 @@
 				<!-- Header -->
 					<header id="header">
 						<div class="logo">
-							<i class="fa fa-heartbeat" aria-hidden="true" ></i>
+							<img src="https://media1.giphy.com/media/L05bcqIqxOgbZq5knR/giphy.gif" alt="Anatomical Heart GIF" style="width: 100%; height: 100%; object-fit: cover; border-radius: 100%;" />
 						</div>
 						<div class="content">
 							<div class="inner">
@@ -141,7 +164,7 @@
 									<p id="result-text"></p>
 									<p id="confidence-text"></p>
 									<hr style="border-color: rgba(255,255,255,0.2); margin: 1em 0;" />
-									<p id="description-text"></p> <!-- New element for the description -->
+									<p id="description-text"></p>
 								</div>
 
 							</article>
@@ -150,19 +173,19 @@
 							<article id="about">
 								<h2 class="major">About The Project</h2>
 								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
-								<p>This tool uses a hybrid AI system. First, a custom convolutional neural network (CNN), built with TensorFlow and fine-tuned on the ACDC and M&Ms datasets, performs an initial classification. This result provides context for a second, more powerful model.</p>
-								<p>The image and the initial classification are then sent to Google's <strong>Gemini</strong>, a large multimodal model. Gemini analyzes the visual information in the context of the prediction to generate a dynamic, detailed description of the heart's condition. This two-step process leverages both a specialized classifier for accuracy and a generalist LLM for descriptive power.</p>
+								<p>This tool was built using a multi-stage process. The core classifier is a Convolutional Neural Network (CNN) built with TensorFlow/Keras, utilizing a MobileNetV2 architecture. It was trained using transfer learning on a combined dataset of cardiac MRI scans from the ACDC and M&Ms challenges, allowing it to accurately classify several conditions.</p>
+								<p>To provide more insightful analysis, the application uses a hybrid AI system. After the initial classification, the image and the predicted condition are sent to Google's <strong>Gemini</strong>, a large multimodal model. Gemini analyzes the visual information to generate a unique, detailed description of the heart's visible features, complementing the classification with a descriptive summary.</p>
 							</article>
 
 					</div>
 
 				<!-- Footer -->
 					<footer id="footer">
-						<p class="copyright">&copy; Cardiac MRI Classifier,A project by Manav Manoj. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+						<p class="copyright">&copy; Cardiac MRI Classifier. A project by Manav Manoj. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
 						<ul class="icons">
 							<!-- IMPORTANT: Replace the placeholder URLs with your actual profile links -->
-							<li><a href="https://www.linkedin.com/in/manav-manoj-40803726a/" target="_blank" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
-							<li><a href="https://github.com/manavmanoj6" target="_blank" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+							<li><a href="https://www.linkedin.com/in/manav-manoj-40803726a" target="_blank" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/manavmanoj6/" target="_blank" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
 						</ul>
 					</footer>
 
@@ -175,7 +198,7 @@
 			<script src="html5up-dimension/assets/js/jquery.min.js"></script>
 			<script src="html5up-dimension/assets/js/browser.min.js"></script>
 			<script src="html5up-dimension/assets/js/breakpoints.min.js"></script>
-			<script src="html5up-dimension/assets/js/util.js"></script>
+			<script src="ahtml5up-dimension/assets/js/util.js"></script>
 			<script src="html5up-dimension/assets/js/main.js"></script>
 			<!-- Custom App Logic -->
 			<script>
@@ -188,7 +211,7 @@
 				const resultContainer = document.getElementById('result-container');
 				const resultText = document.getElementById('result-text');
 				const confidenceText = document.getElementById('confidence-text');
-				const descriptionText = document.getElementById('description-text'); // New reference
+				const descriptionText = document.getElementById('description-text');
 				const loader = document.getElementById('loader');
 				const uploadText = document.getElementById('upload-text');
 
@@ -198,12 +221,10 @@
 				function updateResultUI(prediction, confidence, description) {
 					resultText.textContent = prediction;
 					confidenceText.textContent = `Confidence: ${confidence}`;
-					descriptionText.textContent = description; // Update description
+					descriptionText.textContent = description;
 
-					// Reset classes
 					resultText.className = '';
 
-					// Apply new style based on prediction
 					if (prediction.toLowerCase().includes('normal')) {
 						resultText.classList.add('result-normal');
 					} else {
@@ -242,7 +263,7 @@
 					formData.append('file', uploadedFile);
 
 					try {
-						// IMPORTANT: Update this URL to your deployed Render service URL or keep for local testing
+						// For local testing, use http://127.0.0.1:5000. For deployed apps, this URL will be different.
 						const response = await fetch('http://127.0.0.1:5000/predict', {
 							method: 'POST',
 							body: formData,
@@ -251,7 +272,7 @@
 						if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 						
 						const data = await response.json();
-						updateResultUI(data.prediction, data.confidence, data.description); // Pass description to UI function
+						updateResultUI(data.prediction, data.confidence, data.description);
 
 					} catch (error) {
 						console.error("Error during prediction:", error);
