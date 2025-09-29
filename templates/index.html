@@ -9,11 +9,11 @@
 		<title>Cardiac MRI Classifier</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="static/assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="static/assets/css/noscript.css" /></noscript>
+		<!-- CORRECTED PATHS: Now pointing to the 'static' folder -->
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}" />
+		<noscript><link rel="stylesheet" href="{{ url_for('static', filename='assets/css/noscript.css') }}" /></noscript>
 		<!-- Custom styles for our application -->
 		<style>
-			/* New styles for the blurry background */
 			#bg:before {
 				content: '';
 				position: absolute;
@@ -21,273 +21,175 @@
 				left: 0;
 				width: 100%;
 				height: 100%;
-				background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop');
+				background-image: url("{{ url_for('static', filename='images/bg.jpg') }}");
 				background-position: center;
 				background-size: cover;
 				background-repeat: no-repeat;
 				filter: blur(8px);
-				transform: scale(1.1); /* Prevents blurry edges */
-				z-index: -1; /* Puts the image behind the color overlay */
+				transform: scale(1.1);
+				z-index: -1;
 			}
-
-			/* Increased the size of the logo container */
-			#header .logo {
-				width: 7.5rem;
-				height: 7.5rem;
-			}
-
-			#image-upload-label {
-				border: 2px dashed rgba(255, 255, 255, 0.25);
-				padding: 2em;
-				text-align: center;
-				cursor: pointer;
-				transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-			}
-			#image-upload-label:hover {
-				border-color: #ffffff;
-				background-color: rgba(255, 255, 255, 0.075);
-			}
-			#image-preview-container {
-				text-align: center;
-				margin-bottom: 2em;
-			}
-			#image-preview {
-				max-width: 100%;
-				max-height: 250px;
-				border-radius: 4px;
-				border: 1px solid rgba(255, 255, 255, 0.25);
-			}
-			.hidden {
-				display: none;
-			}
-			.spinner {
-				display: inline-block;
-				border: 3px solid rgba(255, 255, 255, 0.3);
-				width: 24px;
-				height: 24px;
-				border-radius: 50%;
-				border-left-color: #ffffff;
-				animation: spin 1s ease infinite;
-				vertical-align: middle;
-				margin-left: 10px;
-			}
-			@keyframes spin {
-				0% { transform: rotate(0deg); }
-				100% { transform: rotate(360deg); }
-			}
-			#result-container {
-				margin-top: 2em;
-				padding: 1.5em;
-				background-color: rgba(0, 0, 0, 0.2);
-				border-radius: 4px;
-				text-align: left;
-			}
-			#result-text {
-				font-size: 1.5em;
-				font-weight: bold;
-			}
-			#description-text {
-				margin-top: 1em;
-				font-size: 0.9em;
-				line-height: 1.6;
-				color: rgba(255, 255, 255, 0.85);
-			}
+			#image-upload-label { border: 2px dashed rgba(255, 255, 255, 0.25); padding: 2em; text-align: center; cursor: pointer; transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; }
+			#image-upload-label:hover { border-color: #ffffff; background-color: rgba(255, 255, 255, 0.075); }
+			#image-preview-container { text-align: center; margin-bottom: 2em; }
+			#image-preview { max-width: 100%; max-height: 250px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.25); }
+			.hidden { display: none; }
+			.spinner { display: inline-block; border: 3px solid rgba(255, 255, 255, 0.3); width: 24px; height: 24px; border-radius: 50%; border-left-color: #ffffff; animation: spin 1s ease infinite; vertical-align: middle; margin-left: 10px; }
+			@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+			#result-container { margin-top: 2em; padding: 1.5em; background-color: rgba(0, 0, 0, 0.2); border-radius: 4px; text-align: left; }
+			#result-text { font-size: 1.5em; font-weight: bold; }
+			#description-text { margin-top: 1em; font-size: 0.9em; line-height: 1.6; color: rgba(255, 255, 255, 0.85); }
 			.result-normal { color: #2ecc71; }
 			.result-abnormal { color: #e74c3c; }
 			.result-error { color: #f39c12; }
 		</style>
 	</head>
 	<body class="is-preload">
-
-		<!-- Wrapper -->
-			<div id="wrapper">
-
-				<!-- Header -->
-					<header id="header">
-						<div class="logo">
-							<img src="https://media1.giphy.com/media/L05bcqIqxOgbZq5knR/giphy.gif" alt="Anatomical Heart GIF" style="width: 100%; height: 100%; object-fit: cover; border-radius: 100%;" />
-						</div>
-						<div class="content">
-							<div class="inner">
-								<h1>Cardiac MRI Classifier</h1>
-								<p>A deep learning tool to classify cardiomyopathy conditions from MRI scans.</p>
-							</div>
-						</div>
-						<nav>
-							<ul>
-								<li><a href="#intro">Intro</a></li>
-								<li><a href="#classifier">Classifier</a></li>
-								<li><a href="#about">About</a></li>
-							</ul>
-						</nav>
-					</header>
-
-				<!-- Main -->
-					<div id="main">
-
-						<!-- Intro -->
-							<article id="intro">
-								<h2 class="major">Introduction</h2>
-								<span class="image main"><img src="images/pic01.jpg" alt="" /></span>
-								<p>This project showcases a deep learning model designed to analyze cardiac Magnetic Resonance Imaging (MRI) scans. By leveraging advanced computer vision techniques, the model can classify heart conditions, specifically distinguishing between a normal heart and various types of cardiomyopathy.</p>
-								<p>The goal is to provide a fast, accessible tool that demonstrates the power of AI in medical imaging. Navigate to the <a href="#classifier">Classifier</a> section to upload an image and see the model in action.</p>
-							</article>
-
-						<!-- Classifier -->
-							<article id="classifier">
-								<h2 class="major">Classifier</h2>
-								
-								<!-- Image Upload -->
-								<label id="image-upload-label" for="image-upload">
-									<span id="upload-text">Click to select a 2D MRI slice (JPG, PNG)</span>
-								</label>
-								<input type="file" id="image-upload" class="hidden" accept="image/png, image/jpeg" />
-
-								<!-- Image Preview -->
-								<div id="image-preview-container" class="hidden">
-									<img id="image-preview" src="#" alt="Image Preview" />
-								</div>
-								
-								<!-- Actions: Predict Button -->
-								<ul class="actions" style="margin-top: 2em; justify-content: center;">
-									<li>
-										<button id="predict-button" class="button primary" disabled>
-											<span id="button-text">Predict</span>
-											<div id="loader" class="spinner hidden"></div>
-										</button>
-									</li>
-								</ul>
-
-								<!-- Result Section -->
-								<div id="result-container" class="hidden">
-									<h3 id="result-title">Analysis Result</h3>
-									<p id="result-text"></p>
-									<p id="confidence-text"></p>
-									<hr style="border-color: rgba(255,255,255,0.2); margin: 1em 0;" />
-									<p id="description-text"></p>
-								</div>
-
-							</article>
-
-						<!-- About -->
-							<article id="about">
-								<h2 class="major">About The Project</h2>
-								<span class="image main"><img src="images/pic03.jpg" alt="" /></span>
-								<p>This tool was built using a multi-stage process. The core classifier is a Convolutional Neural Network (CNN) built with TensorFlow/Keras, utilizing a MobileNetV2 architecture. It was trained using transfer learning on a combined dataset of cardiac MRI scans from the ACDC and M&Ms challenges, allowing it to accurately classify several conditions.</p>
-								<p>To provide more insightful analysis, the application uses a hybrid AI system. After the initial classification, the image and the predicted condition are sent to Google's <strong>Gemini</strong>, a large multimodal model. Gemini analyzes the visual information to generate a unique, detailed description of the heart's visible features, complementing the classification with a descriptive summary.</p>
-							</article>
-
+		<div id="wrapper">
+			<header id="header">
+				<div class="logo">
+					<i class="fas fa-heartbeat fa-lg" aria-hidden="true"></i>
+				</div>
+				<div class="content">
+					<div class="inner">
+						<h1 style="color: rgb(189, 105, 105);">Cardiac MRI Classifier</h1>
+						<p>A deep learning tool to classify cardiomyopathy conditions from MRI scans.</p>
 					</div>
-
-				<!-- Footer -->
-					<footer id="footer">
-						<p class="copyright">&copy; Cardiac MRI Classifier. A project by Manav Manoj. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
-						<ul class="icons">
-							<!-- IMPORTANT: Replace the placeholder URLs with your actual profile links -->
-							<li><a href="https://www.linkedin.com/in/manav-manoj-40803726a" target="_blank" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
-							<li><a href="https://github.com/manavmanoj6/" target="_blank" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
-						</ul>
-					</footer>
-
+				</div>
+				<nav>
+					<ul>
+						<li><a style="color: rgb(0, 0, 0);"href="#intro">Intro</a></li>
+						<li><a style="color: rgb(0, 0, 0);"href="#classifier">Classifier</a></li>
+						<li><a style="color: rgb(0, 0, 0);"href="#about">About</a></li>
+					</ul>
+				</nav>
+			</header>
+			<div id="main">
+				<article id="intro">
+					<h2 class="major">Introduction</h2>
+					<p>This project showcases a deep learning model designed to analyze cardiac Magnetic Resonance Imaging (MRI) scans. By leveraging advanced computer vision techniques, the model can classify heart conditions, specifically distinguishing between a normal heart and various types of cardiomyopathy.</p>
+					<p>The goal is to provide a fast, accessible tool that demonstrates the power of AI in medical imaging. Navigate to the <a href="#classifier">Classifier</a> section to upload an image and see the model in action.</p>
+				</article>
+				<article id="classifier">
+					<h2 class="major">Classifier</h2>
+					<label id="image-upload-label" for="image-upload">
+						<span id="upload-text">Click to select a 2D MRI slice (JPG, PNG)</span>
+					</label>
+					<input type="file" id="image-upload" class="hidden" accept="image/png, image/jpeg" />
+					<div id="image-preview-container" class="hidden">
+						<img id="image-preview" src="#" alt="Image Preview" />
+					</div>
+					<ul class="actions" style="margin-top: 2em; justify-content: center;">
+						<li>
+							<button id="predict-button" class="button primary" disabled>
+								<span id="button-text">Predict</span>
+								<div id="loader" class="spinner hidden"></div>
+							</button>
+						</li>
+					</ul>
+					<div id="result-container" class="hidden">
+						<h3 id="result-title">Analysis Result</h3>
+						<p id="result-text"></p>
+						<p id="confidence-text"></p>
+						<hr style="border-color: rgba(255,255,255,0.2); margin: 1em 0;" />
+						<p id="description-text"></p>
+					</div>
+				</article>
+				<article id="about">
+					<h2 class="major">About The Project</h2>
+					<p>This tool was built using a multi-stage process. The core classifier is a Convolutional Neural Network (CNN) built with TensorFlow/Keras, utilizing a MobileNetV2 architecture. It was trained using transfer learning on a combined dataset of cardiac MRI scans from the ACDC and M&Ms challenges, allowing it to accurately classify several conditions.</p>
+					<p>To provide more insightful analysis, the application uses a hybrid AI system. After the initial classification, the image and the predicted condition are sent to Google's <strong>Gemini</strong>, a large multimodal model. Gemini analyzes the visual information to generate a unique, detailed description of the heart's visible features, complementing the classification with a descriptive summary.</p>
+				</article>
 			</div>
+			<footer id="footer">
+				<p class="copyright">&copy; Cardiac MRI Classifier. A project by Manav Manoj. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+				<ul class="icons">
+					<li><a href="https://www.linkedin.com/in/manav-manoj-40803726a/" target="_blank" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+					<li><a href="https://github.com/manavmanoj6/" target="_blank" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+				</ul>
+			</footer>
+		</div>
+		<div id="bg"></div>
+		<!-- CORRECTED PATHS: Now pointing to the 'static' folder -->
+		<script src="{{ url_for('static', filename='assets/js/jquery.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/browser.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/breakpoints.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/util.js') }}"></script>
+		<script src="{{ url_for('static', filename='assets/js/main.js') }}"></script>
+		<script>
+			// JS Logic remains the same, but it will fetch from the Render URL
+			const imageUpload = document.getElementById('image-upload');
+			const imagePreview = document.getElementById('image-preview');
+			const imagePreviewContainer = document.getElementById('image-preview-container');
+			const predictButton = document.getElementById('predict-button');
+			const buttonText = document.getElementById('button-text');
+			const resultContainer = document.getElementById('result-container');
+			const resultText = document.getElementById('result-text');
+			const confidenceText = document.getElementById('confidence-text');
+			const descriptionText = document.getElementById('description-text');
+			const loader = document.getElementById('loader');
+			const uploadText = document.getElementById('upload-text');
+			let uploadedFile = null;
 
-		<!-- BG -->
-			<div id="bg"></div>
-
-		<!-- Scripts -->
-			<script src="static/assets/js/jquery.min.js"></script>
-			<script src="static/assets/js/browser.min.js"></script>
-			<script src="static/assets/js/breakpoints.min.js"></script>
-			<script src="static/assets/js/util.js"></script>
-			<script src="static/assets/js/main.js"></script>
-			<!-- Custom App Logic -->
-			<script>
-				// Element References
-				const imageUpload = document.getElementById('image-upload');
-				const imagePreview = document.getElementById('image-preview');
-				const imagePreviewContainer = document.getElementById('image-preview-container');
-				const predictButton = document.getElementById('predict-button');
-				const buttonText = document.getElementById('button-text');
-				const resultContainer = document.getElementById('result-container');
-				const resultText = document.getElementById('result-text');
-				const confidenceText = document.getElementById('confidence-text');
-				const descriptionText = document.getElementById('description-text');
-				const loader = document.getElementById('loader');
-				const uploadText = document.getElementById('upload-text');
-
-				let uploadedFile = null;
-
-				// Update UI with prediction result
-				function updateResultUI(prediction, confidence, description) {
-					resultText.textContent = prediction;
-					confidenceText.textContent = `Confidence: ${confidence}`;
-					descriptionText.textContent = description;
-
-					resultText.className = '';
-
-					if (prediction.toLowerCase().includes('normal')) {
-						resultText.classList.add('result-normal');
-					} else {
-						resultText.classList.add('result-abnormal');
-					}
-					resultContainer.classList.remove('hidden');
+			function updateResultUI(prediction, confidence, description) {
+				resultText.textContent = prediction;
+				confidenceText.textContent = `Confidence: ${confidence}`;
+				descriptionText.textContent = description;
+				resultText.className = '';
+				if (prediction.toLowerCase().includes('normal')) {
+					resultText.classList.add('result-normal');
+				} else {
+					resultText.classList.add('result-abnormal');
 				}
+				resultContainer.classList.remove('hidden');
+			}
 
-				// Event Listener for File Selection
-				imageUpload.addEventListener('change', (event) => {
-					const file = event.target.files[0];
-					if (file) {
-						uploadedFile = file;
-						const reader = new FileReader();
-						reader.onload = (e) => {
-							imagePreview.src = e.target.result;
-							imagePreviewContainer.classList.remove('hidden');
-							predictButton.disabled = false;
-							uploadText.textContent = `Selected: ${file.name}`;
-							resultContainer.classList.add('hidden');
-						};
-						reader.readAsDataURL(file);
-					}
-				});
-
-				// Event Listener for Predict Button
-				predictButton.addEventListener('click', async () => {
-					if (!uploadedFile) return;
-
-					loader.classList.remove('hidden');
-					buttonText.textContent = 'Analyzing';
-					predictButton.disabled = true;
-					resultContainer.classList.add('hidden');
-
-					const formData = new FormData();
-					formData.append('file', uploadedFile);
-
-					try {
-						// For local testing, use http://127.0.0.1:5000. For deployed apps, this URL will be different.
-						const response = await fetch('http://127.0.0.1:5000/predict', {
-							method: 'POST',
-							body: formData,
-						});
-
-						if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-						
-						const data = await response.json();
-						updateResultUI(data.prediction, data.confidence, data.description);
-
-					} catch (error) {
-						console.error("Error during prediction:", error);
-						resultText.textContent = 'Error: Prediction Failed';
-						resultText.className = 'result-error';
-						confidenceText.textContent = 'Please check the server logs and API URL.';
-						descriptionText.textContent = 'The AI description service may be unavailable.';
-						resultContainer.classList.remove('hidden');
-					} finally {
-						loader.classList.add('hidden');
-						buttonText.textContent = 'Predict';
+			imageUpload.addEventListener('change', (event) => {
+				const file = event.target.files[0];
+				if (file) {
+					uploadedFile = file;
+					const reader = new FileReader();
+					reader.onload = (e) => {
+						imagePreview.src = e.target.result;
+						imagePreviewContainer.classList.remove('hidden');
 						predictButton.disabled = false;
-					}
-				});
-			</script>
+						uploadText.textContent = `Selected: ${file.name}`;
+						resultContainer.classList.add('hidden');
+					};
+					reader.readAsDataURL(file);
+				}
+			});
+
+			predictButton.addEventListener('click', async () => {
+				if (!uploadedFile) return;
+				loader.classList.remove('hidden');
+				buttonText.textContent = 'Analyzing';
+				predictButton.disabled = true;
+				resultContainer.classList.add('hidden');
+				const formData = new FormData();
+				formData.append('file', uploadedFile);
+
+				// The URL for the prediction endpoint is now relative, which works for deployed sites.
+				const predictURL = '/predict';
+
+				try {
+					const response = await fetch(predictURL, { method: 'POST', body: formData });
+					if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+					const data = await response.json();
+					updateResultUI(data.prediction, data.confidence, data.description);
+				} catch (error) {
+					console.error("Error during prediction:", error);
+					resultText.textContent = 'Error: Prediction Failed';
+					resultText.className = 'result-error';
+					confidenceText.textContent = 'Please check the server logs and API URL.';
+					descriptionText.textContent = 'The AI description service may be unavailable.';
+					resultContainer.classList.remove('hidden');
+				} finally {
+					loader.classList.add('hidden');
+					buttonText.textContent = 'Predict';
+					predictButton.disabled = false;
+				}
+			});
+		</script>
 	</body>
 </html>
-

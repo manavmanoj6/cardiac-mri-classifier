@@ -63,6 +63,7 @@ mark {
 input::-moz-focus-inner {
 	border: 0;
 	padding: 0;
+	color: #000000;
 }
 
 input, select, textarea {
@@ -1294,15 +1295,15 @@ input, select, textarea {
 			}
 
 		#header .logo {
-			width: 5.5rem;
-			height: 5.5rem;
-			line-height: 5.5rem;
+			width: 3.5rem;
+			height: 3.5rem;
+			line-height: 3.5rem;
 			border: solid 1px #ffffff;
 			border-radius: 100%;
 		}
 
 			#header .logo .icon:before {
-				font-size: 2rem;
+				font-size: 5rem;
 			}
 
 		#header .content {
@@ -1325,6 +1326,7 @@ input, select, textarea {
 				padding: 3rem 2rem;
 				max-height: 40rem;
 				overflow: hidden;
+				color: #000000;
 			}
 
 				#header .content .inner > :last-child {
@@ -1422,6 +1424,7 @@ input, select, textarea {
 				padding-top: 0;
 				padding-bottom: 0;
 				opacity: 0;
+				color: #000000;
 			}
 
 		@media screen and (max-width: 980px) {
@@ -1455,6 +1458,7 @@ input, select, textarea {
 
 			#header .content .inner {
 				padding: 2.5rem 1rem;
+				
 			}
 
 			#header .content p {
@@ -1471,6 +1475,7 @@ input, select, textarea {
 
 				#header .content .inner {
 					padding: 2.5rem 0;
+					color: #000000;
 				}
 
 				#header nav ul {
@@ -1637,6 +1642,7 @@ input, select, textarea {
 		max-width: 100%;
 		margin-top: 2rem;
 		text-align: center;
+		color: rgb(0, 0, 0);
 	}
 
 		#footer .copyright {
